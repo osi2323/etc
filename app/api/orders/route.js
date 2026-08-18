@@ -17,7 +17,6 @@ export async function POST(req){
     if(!db) return NextResponse.json({error:'Supabase sunucu ayarları eksik.'},{status:503});
     const body=await req.json();
     const customer_name=cleanText(body.customer_name,120);
-    const email=cleanText(body.email,200);
     const phone=cleanText(body.phone,30);
     const city=cleanText(body.city,80);
     const district=cleanText(body.district,80);
@@ -26,10 +25,9 @@ export async function POST(req){
     const items=Array.isArray(body.items)?body.items.slice(0,100).map(x=>({
       id:cleanText(x?.id,80),name:cleanText(x?.name,160),qty:Math.max(1,Math.min(99,Number(x?.qty)||1)),price:Math.max(0,Number(x?.price)||0)
     })):[];
-    if(!customer_name||!phone||!city||!district||!address||!email) return NextResponse.json({error:'Teslimat bilgilerini eksiksiz doldurun.'},{status:400});
-    if(!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({error:'Geçerli bir e-posta adresi girin.'},{status:400});
+    if(!customer_name||!phone||!city||!district||!address) return NextResponse.json({error:'Teslimat bilgilerini eksiksiz doldurun.'},{status:400});
     if(!items.length||!Number.isFinite(total)||total<=0) return NextResponse.json({error:'Sepet veya toplam tutar geçersiz.'},{status:400});
-    const {data,error}=await db.from('orders').insert({customer_name,email,phone,city,district,address,total,status:'Talep Formu Bekleniyor',items}).select('id').single();
+    const {data,error}=await db.from('orders').insert({customer_name,phone,city,district,address,total,status:'Talep Formu Bekleniyor',items}).select('id').single();
     if(error) throw error;
     return NextResponse.json({id:data.id});
   }catch(e){ return NextResponse.json({error:e.message||'Sipariş oluşturulamadı.'},{status:500}); }
@@ -43,7 +41,7 @@ export async function GET(req){
     const db=adminClient();
     if(!db) return NextResponse.json({error:'Supabase yapılandırılmadı'},{status:503});
     const {data,error}=await db.from('orders')
-      .select('id,customer_name,phone,total,status,request_name,request_number,tk_date,created_at')
+      .select('*')
       .order('created_at',{ascending:false}).limit(100);
     if(error) throw error;
     return NextResponse.json({orders:data||[]});

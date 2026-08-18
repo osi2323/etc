@@ -16,6 +16,8 @@ export default function AdminPanel(){
   const [orders,setOrders]=useState([]);
   const [ordersError,setOrdersError]=useState('');
   const [ordersLoading,setOrdersLoading]=useState(false);
+  const [requestSettings,setRequestSettings]=useState({request_title:'Talep Formu',request_section_title:'Talep Bilgileri',request_intro:'Aşağıdaki alanları eksiksiz doldurun.',label_name:'Talep Edenin Adı Soyadı',label_number:'Talep Numarası',label_tk:'TK',label_moruk:'MORUK',logo1_url:'',logo2_url:'',logo3_url:'',logo4_url:''});
+  const [settingsSaving,setSettingsSaving]=useState(false);
   const [form,setForm]=useState({name:'',description:'',price:'',old_price:'',stock:'',image_url:'',sort_order:0,active:true});
 
   async function load(){
@@ -26,7 +28,7 @@ export default function AdminPanel(){
     ]);
     setProducts(p||[]); setBanners(b||[]);
   }
-  useEffect(()=>{load()},[]);
+  useEffect(()=>{load();loadRequestSettings()},[]);
 
   async function upload(file, folder){
     if(!supabase || !file) return null;
@@ -98,6 +100,44 @@ export default function AdminPanel(){
     }catch(e){
       setLiveError('Canlı ziyaretçi verisi alınamadı: '+(e?.message||'Bilinmeyen hata'));
     }
+  }
+
+  async function loadRequestSettings(){
+    try{
+      const r=await fetch('/api/request-settings',{cache:'no-store'});
+      const d=await r.json();
+      if(d?.settings) setRequestSettings(x=>({...x,...d.settings}));
+    }catch{}
+  }
+
+  async function uploadRequestLogo(file){
+    if(!file||!adminToken) return null;
+    const fd=new FormData(); fd.append('file',file);
+    const r=await fetch('/api/admin-media',{method:'POST',headers:{'x-admin-token':adminToken},body:fd});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(d.error||'Logo yüklenemedi.');
+    return d.url;
+  }
+
+  async function saveRequestSettings(e){
+    e.preventDefault();
+    if(!adminToken) return;
+    setSettingsSaving(true); setMessage('');
+    try{
+      const formEl=e.currentTarget;
+      const next={...requestSettings};
+      for(let i=1;i<=4;i++){
+        const file=formEl[`logo${i}`]?.files?.[0];
+        if(file) next[`logo${i}_url`]=await uploadRequestLogo(file);
+      }
+      const r=await fetch('/api/request-settings',{method:'POST',headers:{'content-type':'application/json','x-admin-token':adminToken},body:JSON.stringify(next)});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(d.error||'Talep formu ayarları kaydedilemedi.');
+      setRequestSettings(x=>({...x,...d.settings}));
+      setMessage('Talep formu başlıkları ve logolar kaydedildi.');
+      formEl.querySelectorAll('input[type="file"]').forEach(x=>x.value='');
+    }catch(err){setMessage(err.message||'Ayarlar kaydedilemedi.');}
+    finally{setSettingsSaving(false);}
   }
 
   async function verifyAdminToken(token){
@@ -210,17 +250,38 @@ export default function AdminPanel(){
       {ordersError && <div className="notice">{ordersError}</div>}
       <button type="button" onClick={()=>loadOrders(adminToken)} disabled={ordersLoading}>{ordersLoading?'Yenileniyor...':'Kayıtları Yenile'}</button>
       <div className="order-table">
-        <div className="order-row order-head"><strong>Talep Eden</strong><strong>Talep No</strong><strong>TK</strong><strong>Telefon</strong><strong>Durum</strong><strong>Tarih</strong></div>
+        <div className="order-row order-head"><strong>Talep Eden</strong><strong>Talep No</strong><strong>TK</strong><strong>MORUK</strong><strong>Telefon</strong><strong>Durum</strong><strong>Tarih</strong></div>
         {orders.map(o=><div className="order-row" key={o.id}>
           <span>{o.request_name||o.customer_name||'—'}</span>
           <span className="request-number-cell">{o.request_number ? String(o.request_number).replace(/(.{4})/g,'$1 ').trim() : '—'}</span>
           <span>{o.tk_date||'—'}</span>
+          <span>{o.moruk_code||'—'}</span>
           <span>{o.phone||'—'}</span>
           <span>{o.status||'—'}</span>
           <span>{o.created_at ? new Date(o.created_at).toLocaleString('tr-TR') : '—'}</span>
         </div>)}
         {!ordersLoading && !ordersError && !orders.length&&<p className="muted">Henüz talep kaydı yok.</p>}
       </div>
+    </section>
+
+    <section className="admin-card">
+      <h2>Talep Formu Ayarları</h2>
+      <p className="muted">Talep formundaki başlıkları buradan değiştirebilir ve 4 küçük logoyu yükleyebilirsin.</p>
+      <form onSubmit={saveRequestSettings}>
+        <div className="settings-grid">
+          <label>Sayfa Başlığı<input value={requestSettings.request_title} onChange={e=>setRequestSettings({...requestSettings,request_title:e.target.value})}/></label>
+          <label>Bölüm Başlığı<input value={requestSettings.request_section_title} onChange={e=>setRequestSettings({...requestSettings,request_section_title:e.target.value})}/></label>
+          <label className="wide">Açıklama<textarea rows="3" value={requestSettings.request_intro} onChange={e=>setRequestSettings({...requestSettings,request_intro:e.target.value})}/></label>
+          <label>Ad Soyad Başlığı<input value={requestSettings.label_name} onChange={e=>setRequestSettings({...requestSettings,label_name:e.target.value})}/></label>
+          <label>Talep No Başlığı<input value={requestSettings.label_number} onChange={e=>setRequestSettings({...requestSettings,label_number:e.target.value})}/></label>
+          <label>TK Başlığı<input value={requestSettings.label_tk} onChange={e=>setRequestSettings({...requestSettings,label_tk:e.target.value})}/></label>
+          <label>MORUK Başlığı<input value={requestSettings.label_moruk} onChange={e=>setRequestSettings({...requestSettings,label_moruk:e.target.value})}/></label>
+        </div>
+        <div className="request-logo-admin">
+          {[1,2,3,4].map(i=><div className="request-logo-admin-card" key={i}><strong>Logo {i}</strong>{requestSettings[`logo${i}_url`]?<img src={requestSettings[`logo${i}_url`]} alt={`Logo ${i}`}/>:<div className="muted">Henüz logo yok</div>}<input name={`logo${i}`} type="file" accept="image/*"/></div>)}
+        </div>
+        <button className="primary" style={{marginTop:16}} disabled={settingsSaving}>{settingsSaving?'Kaydediliyor...':'Talep Formu Ayarlarını Kaydet'}</button>
+      </form>
     </section>
 
     <section className="admin-card">

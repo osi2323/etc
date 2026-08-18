@@ -25,3 +25,12 @@ Supabase SQL Editor'da bu paketin içindeki `supabase.sql` dosyasını çalışt
 - `ADMIN_DASHBOARD_TOKEN`
 
 Environment variable değişikliklerinden sonra Vercel'de Redeploy yapın.
+
+## Son güncelleme: teslimat + talep formu yönetimi
+- Teslimat alanlarında görünür başlıklar eklendi; e-posta kaldırıldı.
+- Telefon alanı Türkiye cep telefonu biçiminde otomatik formatlanır: `0 (5xx) xxx xx xx`.
+- Talep formuna 4 haneli yalnızca rakam kabul eden `MORUK` alanı eklendi.
+- Talep formunda 4 adet mobil uyumlu logo alanı bulunur.
+- Admin panelinden talep formu sayfa/bölüm/alan başlıkları değiştirilebilir.
+- Admin panelinden dört logo yüklenebilir.
+- Mevcut Supabase projesinde `supabase-talep-guncelleme.sql` dosyasını SQL Editor'da çalıştırın.
