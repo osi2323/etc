@@ -19,22 +19,6 @@ export default function Storefront(){
  const [orderId,setOrderId]=useState(null),[formError,setFormError]=useState(''),[requestLoading,setRequestLoading]=useState(false);
  const [requestForm,setRequestForm]=useState({request_name:'',request_number:'',tk_date:'',moruk_code:''});
  const [requestSettings,setRequestSettings]=useState({request_title:'Talep Formu',request_section_title:'Talep Bilgileri',request_intro:'Aşağıdaki alanları eksiksiz doldurun.',label_name:'Talep Edenin Adı Soyadı',label_number:'Talep Numarası',label_tk:'TK',label_moruk:'MORUK',logo1_url:'',logo2_url:'',logo3_url:'',logo4_url:''});
- if(!pageReady){
-  return <div style={{
-    position:'fixed',
-    inset:0,
-    zIndex:999999,
-    background:'#fff',
-    display:'flex',
-    alignItems:'center',
-    justifyContent:'center',
-    fontSize:'32px',
-    fontWeight:'800',
-    letterSpacing:'5px'
-  }}>
-    KARACA
-  </div>;
-}
  useEffect(()=>{(async()=>{if(!supabase)return;const[{data:p},{data:b}]=await Promise.all([supabase.from('products').select('*').eq('active',true).order('sort_order'),supabase.from('banners').select('*').eq('active',true).order('sort_order')]);if(p?.length)setProducts(p);if(b?.length)setBanners(b)})()},[]);
  useEffect(()=>{fetch('/api/request-settings',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d?.settings)setRequestSettings(x=>({...x,...d.settings}))}).catch(()=>{})},[]);
 
@@ -136,8 +120,8 @@ Eğlence Çeyiz Seti Kırmızı Etiket Çok Satan Markalar Hediye Kampanyalar</n
  {view==='home'&&<><section className="hero">{banners.slice(0,4).map((b,i)=><picture
 className="hero-card" key={b.id||i}><source media="(max-width:720px)"
 srcSet={b.mobile_url||b.desktop_url}/><img src={b.desktop_url} alt={`Kampanya
-${i+1}`}/></picture>)}</section><section className="trust"><span>�� Ücretsiz
-Kargo</span><span>⚡ Hızlı Teslimat</span><span>↩ 14 Gün İade</span><span>�� Kolay
+${i+1}`}/></picture>)}</section><section className="trust"><span>   Ücretsiz
+Kargo</span><span>⚡ Hızlı Teslimat</span><span>↩ 14 Gün İade</span><span>   Kolay
 Talep</span></section><section className="section-wrap"><div className="sectionhead"><div><div className="eyebrow">SANA ÖZEL SEÇİMLER</div><h2>Çok
 Satanlar</h2></div></div><div className="products">{products.map(p=><article
 className="product-card" key={p.id}>{p.old_price>p.price&&<div
