@@ -1,28 +1,22 @@
-# Özel Mağaza + Ödeme Arayüzü
+# Karaca Shop - Talep Formu Sürümü
 
-Next.js + Supabase + Vercel için hazırlanmış mağaza projesi.
+Next.js + Supabase + Vercel tabanlı mağaza demosu.
 
-## Hazır olanlar
-- Responsive mağaza, ürün detay, sepet ve teslimat akışı
-- Tamamen özel tasarımlı kart ödeme ekranı
-- Ad Soyad / Telefon bilgilerinin siparişle kaydı
-- Admin panelinde müşteri ve güvenli kart özeti
-- Kart görünümü: `•••• •••• •••• 1234`
-- Ay/Yıl görünümü: `08/29`
-- CVV görünümü: yalnızca sabit `***`
-- Canlı ziyaretçi hunisi
+## Akış
+1. Sepet
+2. Teslimat Bilgileri
+3. Talep Formu
+4. Onay
 
-## Önemli ödeme notu
-Özel ödeme ekranı arayüzü hazırdır. Kart numarası ve CVV veritabanına veya admin paneline kaydedilmez ve ödeme özeti API'sine gönderilmez. Admin paneline yalnızca kartın son 4 hanesi, kart markası ve AA/YY özeti kaydedilir.
+Talep formu alanları:
+- Talep Edenin Adı Soyadı
+- Talep Numarası: yalnızca rakam, tam 18 hane; ekranda 4'lü gruplar halinde gösterilir.
+- TK: AA/YY formatında 4 rakam; ay 01-12 aralığında olmalıdır.
 
-Bu paket kendi başına banka kartından gerçek tahsilat yapmaz. Gerçek tahsilat için banka/acquirer bağlantısı veya PCI uyumlu tokenizasyon katmanı ayrıca bağlanmalıdır. Bu bağlantı daha sonra özel arayüz korunarak eklenebilir.
+Talep bilgileri `orders` tablosundaki `request_name`, `request_number` ve `tk_date` alanlarına kaydedilir. Admin panelinde Talep Kayıtları bölümünde görünür.
 
-## Kurulum
-1. Supabase SQL Editor'da `supabase.sql` dosyasını çalıştır.
-2. `.env.example` dosyasını `.env.local` olarak kopyala.
-3. Supabase URL, anon key ve server-only service role key değerlerini gir.
-4. `npm install` ve `npm run dev`.
-5. Vercel'de aynı environment variable değerlerini ekle.
+## Supabase
+Supabase SQL Editor'da bu paketin içindeki `supabase.sql` dosyasını çalıştırın. Script mevcut tabloları silmez; yeni talep alanlarını `add column if not exists` ile ekler.
 
 ## Vercel Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -30,6 +24,4 @@ Bu paket kendi başına banka kartından gerçek tahsilat yapmaz. Gerçek tahsil
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_DASHBOARD_TOKEN`
 
-
-## Footer güncellemesi
-Footer içine ETBİS QR görseli ve altına ödeme yöntemleri logo şeridi eklendi. Görseller `public/etbis-qr.png` ve `public/payment-methods.png` dosyalarındadır.
+Environment variable değişikliklerinden sonra Vercel'de Redeploy yapın.

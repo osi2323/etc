@@ -8,7 +8,7 @@ export default function AdminPanel(){
   const [banners,setBanners]=useState([]);
   const [message,setMessage]=useState('');
   const [adminToken,setAdminToken]=useState('');
-  const [live,setLive]=useState({counts:{all:0,browsing:0,cart:0,checkout:0,payment:0},visitors:[]});
+  const [live,setLive]=useState({counts:{all:0,browsing:0,cart:0,checkout:0,request:0},visitors:[]});
   const [liveError,setLiveError]=useState('');
   const [orders,setOrders]=useState([]);
   const [form,setForm]=useState({name:'',description:'',price:'',old_price:'',stock:'',image_url:'',sort_order:0,active:true});
@@ -92,11 +92,11 @@ export default function AdminPanel(){
           <div><strong>{live.counts?.browsing||0}</strong><span>Ürünleri geziyor</span></div>
           <div><strong>{live.counts?.cart||0}</strong><span>Sepet aşamasında</span></div>
           <div><strong>{live.counts?.checkout||0}</strong><span>Adres / teslimat</span></div>
-          <div><strong>{live.counts?.payment||0}</strong><span>Ödeme noktasında</span></div>
+          <div><strong>{live.counts?.request||0}</strong><span>Talep formunda</span></div>
         </div>
         <div className="live-visitors">
           {(live.visitors||[]).slice(0,30).map(v=><div className="visitor-row" key={v.session_id}>
-            <span className={`stage-pill ${v.stage}`}>{v.stage==='browsing'?'Geziniyor':v.stage==='cart'?'Sepette':v.stage==='checkout'?'Adres giriyor':'Ödeme noktasında'}</span>
+            <span className={`stage-pill ${v.stage}`}>{v.stage==='browsing'?'Geziniyor':v.stage==='cart'?'Sepette':v.stage==='checkout'?'Adres giriyor':'Talep formunda'}</span>
             <span>{v.cart_count||0} ürün</span><span>₺{Number(v.cart_total||0).toLocaleString('tr-TR')}</span>
             <span className="muted">{new Date(v.last_seen).toLocaleTimeString('tr-TR')}</span>
           </div>)}
@@ -107,16 +107,19 @@ export default function AdminPanel(){
 
 
     <section className="admin-card">
-      <h2>Müşteri / Ödeme Bilgileri</h2>
-      <p className="muted">Kart numarası yalnızca güvenli son 4 hane özetiyle gösterilir. Ay/yıl güvenli ödeme özeti olarak tutulabilir. CVV hiçbir zaman kaydedilmez; panelde sadece sabit *** görünür.</p>
+      <h2>Talep Kayıtları</h2>
+      <p className="muted">Gönderilen talep formu bilgileri burada görünür.</p>
       <div className="order-table">
-        <div className="order-row order-head"><strong>Ad Soyad</strong><strong>Telefon</strong><strong>Kart</strong><strong>Ay/Yıl</strong><strong>CVV</strong><strong>Durum</strong></div>
+        <div className="order-row order-head"><strong>Talep Eden</strong><strong>Talep No</strong><strong>TK</strong><strong>Telefon</strong><strong>Durum</strong><strong>Tarih</strong></div>
         {orders.map(o=><div className="order-row" key={o.id}>
-          <span>{o.customer_name}</span><span>{o.phone}</span>
-          <span>{o.card_last4 ? `${o.card_brand ? o.card_brand+' ' : ''}•••• •••• •••• ${o.card_last4}` : '—'}</span>
-          <span>{o.card_expiry||'—'}</span><span>***</span><span>{o.status||'—'}</span>
+          <span>{o.request_name||o.customer_name||'—'}</span>
+          <span className="request-number-cell">{o.request_number ? String(o.request_number).replace(/(.{4})/g,'$1 ').trim() : '—'}</span>
+          <span>{o.tk_date||'—'}</span>
+          <span>{o.phone||'—'}</span>
+          <span>{o.status||'—'}</span>
+          <span>{o.created_at ? new Date(o.created_at).toLocaleString('tr-TR') : '—'}</span>
         </div>)}
-        {!orders.length&&<p className="muted">Henüz ödeme özeti yok. Ödeme sağlayıcısı bağlandığında güvenli kart özeti burada görünür.</p>}
+        {!orders.length&&<p className="muted">Henüz talep kaydı yok.</p>}
       </div>
     </section>
 

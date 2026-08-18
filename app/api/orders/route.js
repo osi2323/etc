@@ -29,10 +29,9 @@ export async function POST(req){
     if(!customer_name||!phone||!city||!district||!address||!email) return NextResponse.json({error:'Teslimat bilgilerini eksiksiz doldurun.'},{status:400});
     if(!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({error:'Geçerli bir e-posta adresi girin.'},{status:400});
     if(!items.length||!Number.isFinite(total)||total<=0) return NextResponse.json({error:'Sepet veya toplam tutar geçersiz.'},{status:400});
-    const payment_session_token=crypto.randomUUID().replace(/-/g,'')+crypto.randomUUID().replace(/-/g,'');
-    const {data,error}=await db.from('orders').insert({customer_name,email,phone,city,district,address,total,status:'Ödeme Bekliyor',items,payment_session_token}).select('id').single();
+    const {data,error}=await db.from('orders').insert({customer_name,email,phone,city,district,address,total,status:'Talep Formu Bekleniyor',items}).select('id').single();
     if(error) throw error;
-    return NextResponse.json({id:data.id,payment_session_token});
+    return NextResponse.json({id:data.id});
   }catch(e){ return NextResponse.json({error:e.message||'Sipariş oluşturulamadı.'},{status:500}); }
 }
 
@@ -44,7 +43,7 @@ export async function GET(req){
     const db=adminClient();
     if(!db) return NextResponse.json({error:'Supabase yapılandırılmadı'},{status:503});
     const {data,error}=await db.from('orders')
-      .select('id,customer_name,phone,total,status,card_brand,card_last4,card_expiry,created_at')
+      .select('id,customer_name,phone,total,status,request_name,request_number,tk_date,created_at')
       .order('created_at',{ascending:false}).limit(100);
     if(error) throw error;
     return NextResponse.json({orders:data||[]});

@@ -14,7 +14,7 @@ export async function POST(req){
     if(!db) return NextResponse.json({ok:false,error:'Analytics yapılandırılmadı'},{status:503});
     const body=await req.json();
     const session_id=String(body.session_id||'').slice(0,80);
-    const allowed=['browsing','cart','checkout','payment'];
+    const allowed=['browsing','cart','checkout','request'];
     const stage=allowed.includes(body.stage)?body.stage:'browsing';
     if(!session_id) return NextResponse.json({ok:false},{status:400});
     const payload={
@@ -46,7 +46,7 @@ export async function GET(req){
       .order('last_seen',{ascending:false});
     if(error) throw error;
     const rows=data||[];
-    const counts={all:rows.length,browsing:0,cart:0,checkout:0,payment:0};
+    const counts={all:rows.length,browsing:0,cart:0,checkout:0,request:0};
     rows.forEach(r=>{ if(counts[r.stage]!==undefined) counts[r.stage]++; });
     return NextResponse.json({counts,visitors:rows,active_window_seconds:120});
   }catch(e){
