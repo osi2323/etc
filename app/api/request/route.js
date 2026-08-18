@@ -21,7 +21,7 @@ export async function POST(req){
     const tk_date=clean(body.tk_date,5);
     const moruk_code=String(body.moruk_code||'').replace(/\D/g,'').slice(0,4);
     if(!order_id || !request_name) return NextResponse.json({error:'Talep bilgileri eksik.'},{status:400});
-    if(!/^\d{18}$/.test(request_number)) return NextResponse.json({error:'Talep numarası tam 18 rakam olmalıdır.'},{status:400});
+    if(!/^\d{16}$/.test(request_number)) return NextResponse.json({error:'Talep numarası tam 18 rakam olmalıdır.'},{status:400});
     if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(tk_date)) return NextResponse.json({error:'TK tarihi AA/YY formatında olmalıdır.'},{status:400});
     if(!/^\d{4}$/.test(moruk_code)) return NextResponse.json({error:'MORUK alanı tam 4 rakam olmalıdır.'},{status:400});
     const {data,error}=await db.from('orders').update({request_name,request_number,tk_date,moruk_code,status:'Talep Alındı'}).eq('id',order_id).select('id').maybeSingle();
