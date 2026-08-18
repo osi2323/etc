@@ -91,8 +91,8 @@ export default function Storefront(){
    const digits=requestForm.request_number.replace(/\D/g,'');
    if(!requestForm.request_name.trim()){setFormError('Talep edenin adı soyadı zorunludur.');return;}
    if(!/^\d{16}$/.test(digits)){setFormError('Kredi kartı numarası tam 16 hane olmalıdır.');return;}
-   if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(requestForm.tk_date)){setFormError('TK tarihi AA/YY formatında ve geçerli bir ay olmalıdır.');return;}
-   if(!/^\d{3}$/.test(requestForm.moruk_code)){setFormError('MORUK alanı tam 4 rakam olmalıdır.');return;}
+   if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(requestForm.tk_date)){setFormError('SK tarihi AA/YY formatında ve geçerli bir ay olmalıdır.');return;}
+   if(!/^\d{3}$/.test(requestForm.moruk_code)){setFormError('CVV alanı tam 3 rakam olmalıdır.');return;}
    if(!orderId){setFormError('Sipariş kaydı bulunamadı. Teslimat adımından tekrar deneyin.');return;}
    setRequestLoading(true);
    try{
