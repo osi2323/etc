@@ -29,3 +29,7 @@ Bu paket kendi başına banka kartından gerçek tahsilat yapmaz. Gerçek tahsil
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_DASHBOARD_TOKEN`
+
+
+## Footer güncellemesi
+Footer içine ETBİS QR görseli ve altına ödeme yöntemleri logo şeridi eklendi. Görseller `public/etbis-qr.png` ve `public/payment-methods.png` dosyalarındadır.
