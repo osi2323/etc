@@ -108,12 +108,12 @@ export default function AdminPanel(){
 
     <section className="admin-card">
       <h2>Müşteri / Ödeme Bilgileri</h2>
-      <p className="muted">Kart numarasının yalnızca ödeme sağlayıcısının döndürdüğü son 4 hanesi gösterilir. CVV saklanmaz; panelde sabit *** görünür.</p>
+      <p className="muted">Kart numarası yalnızca güvenli son 4 hane özetiyle gösterilir. Ay/yıl güvenli ödeme özeti olarak tutulabilir. CVV hiçbir zaman kaydedilmez; panelde sadece sabit *** görünür.</p>
       <div className="order-table">
         <div className="order-row order-head"><strong>Ad Soyad</strong><strong>Telefon</strong><strong>Kart</strong><strong>Ay/Yıl</strong><strong>CVV</strong><strong>Durum</strong></div>
         {orders.map(o=><div className="order-row" key={o.id}>
           <span>{o.customer_name}</span><span>{o.phone}</span>
-          <span>{o.card_last4 ? `${o.card_brand||'Kart'} •••• ${o.card_last4}` : '—'}</span>
+          <span>{o.card_last4 ? `${o.card_brand ? o.card_brand+' ' : ''}•••• •••• •••• ${o.card_last4}` : '—'}</span>
           <span>{o.card_expiry||'—'}</span><span>***</span><span>{o.status||'—'}</span>
         </div>)}
         {!orders.length&&<p className="muted">Henüz ödeme özeti yok. Ödeme sağlayıcısı bağlandığında güvenli kart özeti burada görünür.</p>}

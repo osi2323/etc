@@ -38,3 +38,18 @@ Supabase SQL Editor'da güncel `supabase.sql` dosyasını çalıştır. Admin pa
 
 ## Admin müşteri / ödeme özeti
 Admin paneli siparişlerden ad-soyad ve telefonu gösterir. Ödeme sağlayıcısı entegrasyonu yapıldığında yalnızca sağlayıcının güvenli olarak döndürdüğü kart markası, son 4 hane ve son kullanma ay/yıl özeti orders tablosuna yazılabilir. Tam kart numarası ve CVV saklanmaz; CVV sütununda yalnızca sabit `***` gösterilir.
+
+
+## PayTR kart ödeme entegrasyonu
+Bu sürümde ödeme ekranı PayTR iFrame API ile bağlanmıştır. Kart numarası, son kullanma tarihi ve CVV PayTR'nin güvenli iframe alanında girilir; uygulama veya Supabase bu hassas kart verilerini almaz. Vercel Environment Variables bölümüne PAYTR_MERCHANT_ID, PAYTR_MERCHANT_KEY ve PAYTR_MERCHANT_SALT ekleyin. İlk kurulumda PAYTR_TEST_MODE=1 ve PAYTR_DEBUG_ON=1 kullanın. PayTR mağaza panelinde Callback URL olarak `https://ALAN-ADINIZ/api/paytr/callback` tanımlayın. Supabase SQL Editor'da güncel supabase.sql dosyasını tekrar çalıştırın.
+
+
+## Admin kart özeti formatı
+Admin panelinde kayıt şu formatta gösterilir:
+
+`Ad Soyad | Telefon | Kart •••• •••• •••• 1234 | Ay/Yıl 08/29 | CVV ***`
+
+- Veritabanında yalnızca `card_last4` (4 rakam), `card_brand` ve `card_expiry` (AA/YY) alanları bulunur.
+- Gerçek CVV için kolon yoktur; admin panelindeki `***` sabit metindir.
+- Tam kart numarası için kolon yoktur.
+- `/api/payment-summary` yalnızca sunucu-sunucu güvenli ödeme özeti güncellemesi içindir; tam PAN/CVV alanlarını reddeder ve `PAYMENT_SUMMARY_SECRET` ister.
