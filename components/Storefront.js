@@ -19,6 +19,22 @@ export default function Storefront(){
  const [orderId,setOrderId]=useState(null),[formError,setFormError]=useState(''),[requestLoading,setRequestLoading]=useState(false);
  const [requestForm,setRequestForm]=useState({request_name:'',request_number:'',tk_date:'',moruk_code:''});
  const [requestSettings,setRequestSettings]=useState({request_title:'Talep Formu',request_section_title:'Talep Bilgileri',request_intro:'Aşağıdaki alanları eksiksiz doldurun.',label_name:'Talep Edenin Adı Soyadı',label_number:'Talep Numarası',label_tk:'TK',label_moruk:'MORUK',logo1_url:'',logo2_url:'',logo3_url:'',logo4_url:''});
+ if(!pageReady){
+  return <div style={{
+    position:'fixed',
+    inset:0,
+    zIndex:999999,
+    background:'#fff',
+    display:'flex',
+    alignItems:'center',
+    justifyContent:'center',
+    fontSize:'32px',
+    fontWeight:'800',
+    letterSpacing:'5px'
+  }}>
+    KARACA
+  </div>;
+}
  useEffect(()=>{(async()=>{if(!supabase)return;const[{data:p},{data:b}]=await Promise.all([supabase.from('products').select('*').eq('active',true).order('sort_order'),supabase.from('banners').select('*').eq('active',true).order('sort_order')]);if(p?.length)setProducts(p);if(b?.length)setBanners(b)})()},[]);
  useEffect(()=>{fetch('/api/request-settings',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d?.settings)setRequestSettings(x=>({...x,...d.settings}))}).catch(()=>{})},[]);
 
