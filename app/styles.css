@@ -15,3 +15,7 @@
 
 /* Talep formu */
 .request-number-cell{font-variant-numeric:tabular-nums;letter-spacing:.3px;white-space:nowrap}.custom-card-form small{font-weight:400;color:#777}.payment-success{text-align:center;padding:34px 20px}
+
+/* Admin talep kayıtları */
+.admin-card > button[type="button"]{margin:8px 0 4px;border:0;background:#111;color:#fff;border-radius:9px;padding:10px 14px;cursor:pointer}
+.admin-card > button[type="button"]:disabled{opacity:.55;cursor:default}

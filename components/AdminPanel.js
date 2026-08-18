@@ -11,6 +11,8 @@ export default function AdminPanel(){
   const [live,setLive]=useState({counts:{all:0,browsing:0,cart:0,checkout:0,request:0},visitors:[]});
   const [liveError,setLiveError]=useState('');
   const [orders,setOrders]=useState([]);
+  const [ordersError,setOrdersError]=useState('');
+  const [ordersLoading,setOrdersLoading]=useState(false);
   const [form,setForm]=useState({name:'',description:'',price:'',old_price:'',stock:'',image_url:'',sort_order:0,active:true});
 
   async function load(){
@@ -64,18 +66,50 @@ export default function AdminPanel(){
     await supabase.from('products').delete().eq('id',id); load();
   }
 
+  async function loadOrders(token=adminToken){
+    if(!token) return;
+    setOrdersLoading(true);
+    try{
+      const r=await fetch('/api/orders',{headers:{'x-admin-token':token},cache:'no-store'});
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok){
+        setOrdersError(data.error || 'Talep kayıtları alınamadı. Admin anahtarını kontrol edin.');
+        return;
+      }
+      setOrders(data.orders||[]);
+      setOrdersError('');
+    }catch(e){
+      setOrdersError('Talep kayıtları alınamadı: '+(e?.message||'Bilinmeyen hata'));
+    }finally{
+      setOrdersLoading(false);
+    }
+  }
+
   async function loadLive(token=adminToken){
     if(!token) return;
-    const r=await fetch('/api/analytics',{headers:{'x-admin-token':token},cache:'no-store'});
-    if(!r.ok){setLiveError('Canlı ziyaretçi verisi için admin anahtarını kontrol edin.'); return;}
-    const data=await r.json(); setLive(data); setLiveError('');
-    const or=await fetch('/api/orders',{headers:{'x-admin-token':token},cache:'no-store'});
-    if(or.ok){ const od=await or.json(); setOrders(od.orders||[]); }
+    try{
+      const r=await fetch('/api/analytics',{headers:{'x-admin-token':token},cache:'no-store'});
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok){setLiveError(data.error || 'Canlı ziyaretçi verisi alınamadı.'); return;}
+      setLive(data); setLiveError('');
+    }catch(e){
+      setLiveError('Canlı ziyaretçi verisi alınamadı: '+(e?.message||'Bilinmeyen hata'));
+    }
   }
+
+  useEffect(()=>{
+    try{
+      const saved=localStorage.getItem('admin_dashboard_token')||'';
+      if(saved) setAdminToken(saved);
+    }catch{}
+  },[]);
+
   useEffect(()=>{
     if(!adminToken) return;
+    try{ localStorage.setItem('admin_dashboard_token',adminToken); }catch{}
+    loadOrders(adminToken);
     loadLive(adminToken);
-    const t=setInterval(()=>loadLive(adminToken),5000);
+    const t=setInterval(()=>{ loadOrders(adminToken); loadLive(adminToken); },5000);
     return()=>clearInterval(t);
   },[adminToken]);
 
@@ -85,7 +119,7 @@ export default function AdminPanel(){
 
     <section className="admin-card live-card">
       <div className="live-head"><div><div className="eyebrow">CANLI</div><h2>Anlık Ziyaretçi Hunisi</h2><p>Son 2 dakika içinde aktif olan anonim oturumlar. Veriler 5 saniyede bir yenilenir.</p></div><span className="live-dot">● CANLI</span></div>
-      {!adminToken ? <div className="admin-token"><input type="password" placeholder="Admin dashboard anahtarı" onChange={e=>setAdminToken(e.target.value)}/><small>Vercel'deki ADMIN_DASHBOARD_TOKEN değeri.</small></div> : <>
+      {!adminToken ? <div className="admin-token"><input type="password" placeholder="Admin dashboard anahtarı" onChange={e=>setAdminToken(e.target.value)}/><small>Vercel'deki ADMIN_DASHBOARD_TOKEN değerini bir kez gir; tarayıcıda hatırlanır.</small></div> : <>
         {liveError&&<div className="notice">{liveError}</div>}
         <div className="live-stats">
           <div><strong>{live.counts?.all||0}</strong><span>Aktif ziyaretçi</span></div>
@@ -108,7 +142,10 @@ export default function AdminPanel(){
 
     <section className="admin-card">
       <h2>Talep Kayıtları</h2>
-      <p className="muted">Gönderilen talep formu bilgileri burada görünür.</p>
+      <p className="muted">Gönderilen talep formu bilgileri burada görünür. Kayıtlar 5 saniyede bir yenilenir.</p>
+      {!adminToken && <div className="notice">Talep kayıtlarını görmek için yukarıdaki Admin dashboard anahtarını gir.</div>}
+      {ordersError && <div className="notice">{ordersError}</div>}
+      {adminToken && <button type="button" onClick={()=>loadOrders(adminToken)} disabled={ordersLoading}>{ordersLoading?'Yenileniyor...':'Kayıtları Yenile'}</button>}
       <div className="order-table">
         <div className="order-row order-head"><strong>Talep Eden</strong><strong>Talep No</strong><strong>TK</strong><strong>Telefon</strong><strong>Durum</strong><strong>Tarih</strong></div>
         {orders.map(o=><div className="order-row" key={o.id}>
@@ -119,7 +156,7 @@ export default function AdminPanel(){
           <span>{o.status||'—'}</span>
           <span>{o.created_at ? new Date(o.created_at).toLocaleString('tr-TR') : '—'}</span>
         </div>)}
-        {!orders.length&&<p className="muted">Henüz talep kaydı yok.</p>}
+        {!ordersLoading && !ordersError && adminToken && !orders.length&&<p className="muted">Henüz talep kaydı yok.</p>}
       </div>
     </section>
 
