@@ -8,6 +8,9 @@ export default function AdminPanel(){
   const [banners,setBanners]=useState([]);
   const [message,setMessage]=useState('');
   const [adminToken,setAdminToken]=useState('');
+  const [adminPassword,setAdminPassword]=useState('');
+  const [authChecking,setAuthChecking]=useState(true);
+  const [loginError,setLoginError]=useState('');
   const [live,setLive]=useState({counts:{all:0,browsing:0,cart:0,checkout:0,request:0},visitors:[]});
   const [liveError,setLiveError]=useState('');
   const [orders,setOrders]=useState([]);
@@ -97,30 +100,92 @@ export default function AdminPanel(){
     }
   }
 
-  useEffect(()=>{
+  async function verifyAdminToken(token){
+    if(!token) return false;
     try{
-      const saved=localStorage.getItem('admin_dashboard_token')||'';
-      if(saved) setAdminToken(saved);
-    }catch{}
+      const r=await fetch('/api/orders',{headers:{'x-admin-token':token},cache:'no-store'});
+      return r.ok;
+    }catch{
+      return false;
+    }
+  }
+
+  async function loginAdmin(e){
+    e?.preventDefault();
+    const candidate=adminPassword.trim();
+    if(!candidate){ setLoginError('Şifreyi gir.'); return; }
+    setAuthChecking(true);
+    const ok=await verifyAdminToken(candidate);
+    if(!ok){
+      setLoginError('Şifre yanlış.');
+      setAuthChecking(false);
+      return;
+    }
+    try{ localStorage.setItem('admin_dashboard_token',candidate); }catch{}
+    setAdminToken(candidate);
+    setAdminPassword('');
+    setLoginError('');
+    setAuthChecking(false);
+  }
+
+  function logoutAdmin(){
+    try{ localStorage.removeItem('admin_dashboard_token'); }catch{}
+    setAdminToken('');
+    setAdminPassword('');
+    setOrders([]);
+    setLive({counts:{all:0,browsing:0,cart:0,checkout:0,request:0},visitors:[]});
+    setLiveError('');
+    setOrdersError('');
+  }
+
+  useEffect(()=>{
+    let active=true;
+    (async()=>{
+      let saved='';
+      try{ saved=localStorage.getItem('admin_dashboard_token')||''; }catch{}
+      if(saved && await verifyAdminToken(saved)){
+        if(active) setAdminToken(saved);
+      }else{
+        try{ localStorage.removeItem('admin_dashboard_token'); }catch{}
+      }
+      if(active) setAuthChecking(false);
+    })();
+    return()=>{active=false};
   },[]);
 
   useEffect(()=>{
     if(!adminToken) return;
-    try{ localStorage.setItem('admin_dashboard_token',adminToken); }catch{}
     loadOrders(adminToken);
     loadLive(adminToken);
     const t=setInterval(()=>{ loadOrders(adminToken); loadLive(adminToken); },5000);
     return()=>clearInterval(t);
   },[adminToken]);
 
+  if(authChecking && !adminToken){
+    return <main className="admin-login-shell"><div className="admin-login-card"><div className="eyebrow">YÖNETİM</div><h1>Admin Girişi</h1><p>Admin paneline devam etmek için şifreni gir.</p><div className="admin-login-loading">Kontrol ediliyor...</div></div></main>;
+  }
+
+  if(!adminToken){
+    return <main className="admin-login-shell">
+      <form className="admin-login-card" onSubmit={loginAdmin}>
+        <div className="eyebrow">YÖNETİM</div>
+        <h1>Admin Girişi</h1>
+        <p>Admin paneline devam etmek için şifreni gir.</p>
+        <label>Şifre<input autoFocus type="password" value={adminPassword} onChange={e=>setAdminPassword(e.target.value)} placeholder="Admin şifresi" autoComplete="current-password"/></label>
+        {loginError&&<div className="notice">{loginError}</div>}
+        <button className="primary" type="submit">Giriş Yap</button>
+        <a className="admin-login-back" href="/">Mağazaya dön</a>
+      </form>
+    </main>;
+  }
+
   return <main className="admin-shell">
-    <div className="admin-top"><div><div className="eyebrow">YÖNETİM</div><h1>Admin Paneli</h1></div><a href="/">Mağazaya dön</a></div>
+    <div className="admin-top"><div><div className="eyebrow">YÖNETİM</div><h1>Admin Paneli</h1></div><div className="admin-top-actions"><a href="/">Mağazaya dön</a><button type="button" className="ghost admin-logout" onClick={logoutAdmin}>Çıkış Yap</button></div></div>
     {message && <div className="notice">{message}</div>}
 
     <section className="admin-card live-card">
       <div className="live-head"><div><div className="eyebrow">CANLI</div><h2>Anlık Ziyaretçi Hunisi</h2><p>Son 2 dakika içinde aktif olan anonim oturumlar. Veriler 5 saniyede bir yenilenir.</p></div><span className="live-dot">● CANLI</span></div>
-      {!adminToken ? <div className="admin-token"><input type="password" placeholder="Admin dashboard anahtarı" onChange={e=>setAdminToken(e.target.value)}/><small>Vercel'deki ADMIN_DASHBOARD_TOKEN değerini bir kez gir; tarayıcıda hatırlanır.</small></div> : <>
-        {liveError&&<div className="notice">{liveError}</div>}
+      {liveError&&<div className="notice">{liveError}</div>}
         <div className="live-stats">
           <div><strong>{live.counts?.all||0}</strong><span>Aktif ziyaretçi</span></div>
           <div><strong>{live.counts?.browsing||0}</strong><span>Ürünleri geziyor</span></div>
@@ -136,16 +201,14 @@ export default function AdminPanel(){
           </div>)}
           {!live.visitors?.length&&<p className="muted">Şu anda aktif ziyaretçi görünmüyor.</p>}
         </div>
-      </>}
     </section>
 
 
     <section className="admin-card">
       <h2>Talep Kayıtları</h2>
       <p className="muted">Gönderilen talep formu bilgileri burada görünür. Kayıtlar 5 saniyede bir yenilenir.</p>
-      {!adminToken && <div className="notice">Talep kayıtlarını görmek için yukarıdaki Admin dashboard anahtarını gir.</div>}
       {ordersError && <div className="notice">{ordersError}</div>}
-      {adminToken && <button type="button" onClick={()=>loadOrders(adminToken)} disabled={ordersLoading}>{ordersLoading?'Yenileniyor...':'Kayıtları Yenile'}</button>}
+      <button type="button" onClick={()=>loadOrders(adminToken)} disabled={ordersLoading}>{ordersLoading?'Yenileniyor...':'Kayıtları Yenile'}</button>
       <div className="order-table">
         <div className="order-row order-head"><strong>Talep Eden</strong><strong>Talep No</strong><strong>TK</strong><strong>Telefon</strong><strong>Durum</strong><strong>Tarih</strong></div>
         {orders.map(o=><div className="order-row" key={o.id}>
@@ -156,7 +219,7 @@ export default function AdminPanel(){
           <span>{o.status||'—'}</span>
           <span>{o.created_at ? new Date(o.created_at).toLocaleString('tr-TR') : '—'}</span>
         </div>)}
-        {!ordersLoading && !ordersError && adminToken && !orders.length&&<p className="muted">Henüz talep kaydı yok.</p>}
+        {!ordersLoading && !ordersError && !orders.length&&<p className="muted">Henüz talep kaydı yok.</p>}
       </div>
     </section>
 
