@@ -10,46 +10,27 @@ function adminClient(){
 
 export async function POST(req){
   try{
-    const db=adminClient();
-    if(!db) return NextResponse.json({ok:false,error:'Analytics yapılandırılmadı'},{status:503});
     const body=await req.json();
-    const session_id=String(body.session_id||'').slice(0,80);
-    const allowed=['browsing','cart','checkout','payment'];
-    const stage=allowed.includes(body.stage)?body.stage:'browsing';
-    if(!session_id) return NextResponse.json({ok:false},{status:400});
-    const payload={
-      session_id,
-      stage,
-      cart_count:Math.max(0,Number(body.cart_count)||0),
-      cart_total:Math.max(0,Number(body.cart_total)||0),
-      last_seen:new Date().toISOString()
-    };
-    const {error}=await db.from('visitor_sessions').upsert(payload,{onConflict:'session_id'});
+    // Tam kart numarası ve CVV bu API'ye gönderilemez.
+    const forbidden=['card_number','cardNumber','pan','cvv','cvc','security_code','securityCode'];
+    if(forbidden.some(k=>Object.prototype.hasOwnProperty.call(body,k))) return NextResponse.json({error:'Tam kart numarası/CVV kabul edilmez.'},{status:400});
+    const order_id=String(body.order_id||'').trim();
+    const token=String(body.payment_session_token||'').trim();
+    const last4=String(body.card_last4||'').replace(/\D/g,'');
+    const expiry=String(body.card_expiry||'').trim();
+    const brand=String(body.card_brand||'Kart').trim().slice(0,40);
+    if(!order_id||!token) return NextResponse.json({error:'Ödeme oturumu eksik.'},{status:400});
+    if(!/^\d{4}$/.test(last4)) return NextResponse.json({error:'Son 4 hane geçersiz.'},{status:400});
+    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) return NextResponse.json({error:'AA/YY geçersiz.'},{status:400});
+    const db=adminClient();
+    if(!db) return NextResponse.json({error:'Supabase yapılandırılmadı.'},{status:503});
+    const {data,error}=await db.from('orders').select('id').eq('id',order_id).eq('payment_session_token',token).maybeSingle();
     if(error) throw error;
+    if(!data) return NextResponse.json({error:'Geçersiz ödeme oturumu.'},{status:403});
+    const {error:updateError}=await db.from('orders').update({card_last4:last4,card_expiry:expiry,card_brand:brand,status:'Tahsilat Bağlantısı Bekliyor'}).eq('id',order_id).eq('payment_session_token',token);
+    if(updateError) throw updateError;
     return NextResponse.json({ok:true});
   }catch(e){
-    return NextResponse.json({ok:false,error:e.message},{status:500});
-  }
-}
-
-export async function GET(req){
-  try{
-    const expected=process.env.ADMIN_DASHBOARD_TOKEN;
-    const supplied=req.headers.get('x-admin-token');
-    if(!expected || supplied!==expected) return NextResponse.json({error:'Yetkisiz'},{status:401});
-    const db=adminClient();
-    if(!db) return NextResponse.json({error:'Analytics yapılandırılmadı'},{status:503});
-    const since=new Date(Date.now()-2*60*1000).toISOString();
-    const {data,error}=await db.from('visitor_sessions')
-      .select('session_id,stage,cart_count,cart_total,last_seen')
-      .gte('last_seen',since)
-      .order('last_seen',{ascending:false});
-    if(error) throw error;
-    const rows=data||[];
-    const counts={all:rows.length,browsing:0,cart:0,checkout:0,payment:0};
-    rows.forEach(r=>{ if(counts[r.stage]!==undefined) counts[r.stage]++; });
-    return NextResponse.json({counts,visitors:rows,active_window_seconds:120});
-  }catch(e){
-    return NextResponse.json({error:e.message},{status:500});
+    return NextResponse.json({error:e.message||'İşlem başarısız.'},{status:500});
   }
 }

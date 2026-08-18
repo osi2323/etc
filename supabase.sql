@@ -40,3 +40,8 @@ exception when duplicate_object then null; end $$;
 do $$ begin
   alter table public.orders add constraint orders_card_expiry_format check (card_expiry is null or card_expiry ~ '^(0[1-9]|1[0-2])/[0-9]{2}$');
 exception when duplicate_object then null; end $$;
+
+-- Browser ödeme formu için tahmin edilmesi zor, siparişe özel kısa ömürlü erişim anahtarı.
+-- Hassas kart verisi içermez.
+alter table public.orders add column if not exists payment_session_token text;
+create unique index if not exists orders_payment_session_token_idx on public.orders(payment_session_token) where payment_session_token is not null;
