@@ -44,3 +44,10 @@ Environment Variables güncellendikten sonra Vercel'de yeniden deploy et.
 ## Admin
 
 `/admin` adresine gir. `ADMIN_DASHBOARD_TOKEN` değerini şifre olarak kullan.
+
+## V3 güncellemesi
+- Talep sonrası bildirim ekranı admin panelinden özelleştirilebilir: ikon, başlık, açıklama ve buton metni.
+- Ana sayfadaki kategori satırı kaldırıldı; yerine mobil uyumlu "Haftanın Kampanyaları" kayan yazı şeridi eklendi.
+- Kayan yazı başlığı ve 3 kampanya mesajı admin panelinden düzenlenebilir.
+- Büyük banner / ürün / logo görsellerinin mobilde sayfayı yatay genişletmesini önleyen ek responsive kurallar eklendi.
+- Bu sürüme geçerken `supabase-v3-kampanya-bildirim.sql` dosyasını bir kez çalıştırın.

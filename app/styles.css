@@ -59,3 +59,58 @@
   .floating-cart-count{min-width:24px!important;height:24px!important}
   .product-edit-panel{padding:12px}.admin-product-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;width:100%}.admin-product-actions button{width:100%}
 }
+
+/* ===== V3 kampanya şeridi + başarı ekranı + tam mobil görsel güvenliği ===== */
+html,body{max-width:100%;overflow-x:hidden}
+main{width:100%;max-width:100%;overflow-x:clip}
+img,picture,video,svg{max-width:100%}
+img{height:auto}
+
+.campaign-ticker{width:100%;max-width:100%;display:flex;align-items:stretch;background:#181818;color:#fff;overflow:hidden;border-top:1px solid #2b2b2b;border-bottom:1px solid #2b2b2b}
+.campaign-ticker-label{flex:0 0 auto;display:flex;align-items:center;padding:12px 22px;background:#b61f18;font-size:12px;line-height:1;font-weight:900;letter-spacing:1.15px;white-space:nowrap;position:relative;z-index:2}
+.campaign-ticker-window{min-width:0;flex:1;overflow:hidden;display:flex;align-items:center}
+.campaign-ticker-track{display:flex;align-items:center;width:max-content;white-space:nowrap;animation:campaignTickerMove 24s linear infinite;will-change:transform}
+.campaign-ticker-track span{display:inline-flex;align-items:center;gap:8px;padding:0 34px;font-size:13px;font-weight:650;letter-spacing:.15px}
+.campaign-ticker:hover .campaign-ticker-track{animation-play-state:paused}
+@keyframes campaignTickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.custom-success-screen{max-width:650px;text-align:center;padding-top:48px;padding-bottom:54px}
+.custom-success-screen .shield{width:86px;height:86px;margin:0 auto 18px;display:grid;place-items:center;border-radius:50%;background:#f5f5f5;font-size:44px;box-shadow:inset 0 0 0 1px #e8e8e8}
+.custom-success-screen h2{font-size:30px;margin:0 0 12px;overflow-wrap:anywhere}
+.custom-success-screen p{max-width:520px;margin:0 auto 24px;color:#666;line-height:1.65;overflow-wrap:anywhere}
+.custom-success-screen .big-red{max-width:360px;margin:0 auto}
+
+.campaign-admin-card{overflow:hidden}
+.campaign-admin-preview{margin-top:14px;border-radius:13px;background:#181818;color:#fff;overflow:hidden;display:grid;grid-template-columns:auto 1fr;align-items:center}
+.campaign-admin-preview>strong{padding:11px 14px;background:#b61f18;font-size:11px;letter-spacing:1px;white-space:nowrap}
+.campaign-admin-preview>div{min-width:0;display:flex;gap:28px;overflow:hidden;padding:11px 16px;white-space:nowrap;font-size:12px}
+.success-admin-preview{margin-top:14px;padding:18px;border:1px solid #e7e7e7;border-radius:14px;background:#fff;text-align:center;display:grid;gap:8px}
+.success-admin-preview>div{font-size:32px}.success-admin-preview strong{font-size:18px}.success-admin-preview p{margin:0;color:#777;font-size:12px;overflow-wrap:anywhere}.success-admin-preview button{border:0;border-radius:8px;padding:10px;background:#c92519;color:#fff;font-weight:800}
+
+/* Büyük görseller hiçbir ekranda sayfayı genişletmesin */
+.hero,.hero-card,.product-card,.product-open,.detail-gallery,.cart-row,.request-cart-item,.request-logo-slot,.request-logo-admin-card,.banner-form,.admin-product,.footer-etbis,.payment-strip{min-width:0;max-width:100%}
+.hero-card img{width:100%;max-width:100%;display:block}
+.product-card img,.product-open img{width:100%;max-width:100%;object-fit:contain}
+.detail-gallery img{width:100%;max-width:100%;object-fit:contain}
+.cart-row img,.request-cart-item img,.admin-product img,.request-logo-slot img,.request-logo-admin-card img,.preview-logos img{max-width:100%;object-fit:contain}
+.payment-strip{overflow:hidden}.payment-strip img{display:block;max-width:100%;width:100%;height:auto;object-fit:contain}
+.footer-etbis img{max-width:100%;height:auto;object-fit:contain}
+
+@media(max-width:800px){
+  .campaign-ticker{display:block;border-radius:0}
+  .campaign-ticker-label{width:100%;justify-content:center;padding:10px 12px;font-size:11px;letter-spacing:1px}
+  .campaign-ticker-window{width:100%;min-height:38px}
+  .campaign-ticker-track{animation-duration:19s}
+  .campaign-ticker-track span{padding:0 22px;font-size:12px}
+  .hero{width:100%;max-width:100%;box-sizing:border-box}
+  .hero-card{box-sizing:border-box;overflow:hidden}
+  .hero-card img{width:100%!important;max-width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important;background:#f7f5f2}
+  .product-card,.checkout-shell,.custom-pay-wrap,.request-cart-summary,.detail,.footer,.admin-shell,.admin-card{max-width:100%;box-sizing:border-box}
+  .product-card img,.product-open img{height:auto!important;max-height:280px;object-fit:contain!important}
+  .detail-gallery{min-height:0!important;padding:12px}.detail-gallery img{max-height:420px}
+  .cart-row{grid-template-columns:64px minmax(0,1fr);gap:10px}.cart-row img{width:64px!important;height:64px!important;object-fit:contain!important}.cart-row .qty{grid-column:1/-1}
+  .request-cart-item{overflow:hidden}.request-cart-info{min-width:0}.request-cart-info strong{overflow-wrap:anywhere}
+  .request-logo-slot img{width:100%!important;height:100%!important;object-fit:contain!important}
+  .campaign-admin-preview{grid-template-columns:1fr}.campaign-admin-preview>strong{text-align:center}.campaign-admin-preview>div{overflow:hidden}
+  .custom-success-screen{margin-left:12px;margin-right:12px;padding:34px 18px 40px}.custom-success-screen h2{font-size:25px}.custom-success-screen .shield{width:72px;height:72px;font-size:36px}
+}

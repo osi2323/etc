@@ -35,6 +35,14 @@ const defaultRequestSettings={
   helper_moruk:'Yalnızca rakam giriniz.',
   moruk_length:4,
   submit_button_text:'Talebi Gönder',
+  success_icon:'✅',
+  success_title:'Talebiniz alındı',
+  success_message:'Talep bilgileriniz başarıyla kaydedildi.',
+  success_button_text:'Mağazaya Dön',
+  campaign_title:'HAFTANIN KAMPANYALARI',
+  campaign_message_1:'Seçili ürünlerde fırsatları kaçırma',
+  campaign_message_2:'Çok satan ürünlerde özel fiyatlar',
+  campaign_message_3:'Stoklarla sınırlı avantajlar',
   logo1_url:'',logo2_url:'',logo3_url:'',logo4_url:''
 };
 
@@ -178,7 +186,14 @@ export default function Storefront(){
       <div className="search">Aradığın Her Şey</div>
       <div className="header-icons"><span>♡ Favorilerim</span><span>Hesabım</span><button className="ghost" onClick={()=>setView('cart')}>Sepetim ({count})</button></div>
     </header>
-    <nav className="nav">Kategoriler　 Sofra　 Mutfak　 Küçük Ev Aletleri　 Ev ve Yaşam　 Hobi Eğlence　 Çeyiz Seti　 Kırmızı Etiket　 Çok Satan　 Markalar　 Hediye　 Kampanyalar</nav>
+    <section className="campaign-ticker" aria-label={requestSettings.campaign_title||'Haftanın Kampanyaları'}>
+      <div className="campaign-ticker-label">{requestSettings.campaign_title||'HAFTANIN KAMPANYALARI'}</div>
+      <div className="campaign-ticker-window">
+        <div className="campaign-ticker-track">
+          {[requestSettings.campaign_message_1,requestSettings.campaign_message_2,requestSettings.campaign_message_3].filter(Boolean).concat([requestSettings.campaign_message_1,requestSettings.campaign_message_2,requestSettings.campaign_message_3].filter(Boolean)).map((text,i)=><span key={i}>✦ {text}</span>)}
+        </div>
+      </div>
+    </section>
 
     {view==='home'&&<>
       <section className="hero">{banners.slice(0,4).map((b,i)=><picture className="hero-card" key={b.id||i}><source media="(max-width:720px)" srcSet={b.mobile_url||b.desktop_url}/><img src={b.desktop_url||b.mobile_url} alt={`Kampanya ${i+1}`}/></picture>)}</section>
@@ -230,7 +245,7 @@ export default function Storefront(){
       <button className="big-outline" onClick={()=>setView('checkout')}>Teslimata Dön</button>
     </section>}
 
-    {view==='success'&&<section className="checkout-shell payment-success"><div className="shield">✅</div><h2>Talebiniz alındı</h2><p>Talep bilgileriniz başarıyla kaydedildi.</p><button className="big-red" onClick={()=>{setCart([]);setOrderId(null);setRequestForm({request_name:'',request_number:'',tk_date:'',moruk_code:''});setView('home')}}>Mağazaya Dön</button></section>}
+    {view==='success'&&<section className="checkout-shell payment-success custom-success-screen"><div className="shield">{requestSettings.success_icon||'✅'}</div><h2>{requestSettings.success_title||'Talebiniz alındı'}</h2><p>{requestSettings.success_message||'Talep bilgileriniz başarıyla kaydedildi.'}</p><button className="big-red" onClick={()=>{setCart([]);setOrderId(null);setRequestForm({request_name:'',request_number:'',tk_date:'',moruk_code:''});setView('home')}}>{requestSettings.success_button_text||'Mağazaya Dön'}</button></section>}
 
     {view==='home'&&<button className="floating-cart" onClick={()=>setView('cart')} aria-label={`Sepet, ${count} ürün`}><span className="floating-cart-icon">🛒</span><span className="floating-cart-text">Sepet</span><span className="floating-cart-count">{count}</span></button>}
 
