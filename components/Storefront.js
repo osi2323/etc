@@ -107,6 +107,12 @@ export default function Storefront(){
   const buy=p=>{add(p);setView('checkout');scrollTo(0,0)};
   const change=(id,d)=>setCart(c=>c.map(x=>x.id===id?{...x,qty:Math.min(Number(x.stock)||99,Math.max(1,x.qty+d))}:x));
   const remove=id=>setCart(c=>c.filter(x=>x.id!==id));
+  const openCart=()=>{
+    setView('cart');
+    requestAnimationFrame(()=>{
+      window.scrollTo({top:0,left:0,behavior:'auto'});
+    });
+  };
 
   async function saveOrder(e){
     e.preventDefault();
@@ -186,7 +192,7 @@ export default function Storefront(){
     <header className="header">
       <button className="brand ghost" onClick={()=>setView('home')}>KARACA</button>
       <div className="search">Aradığın Her Şey</div>
-      <div className="header-icons"><span>♡ Favorilerim</span><span>Hesabım</span><button className="ghost" onClick={()=>setView('cart')}>Sepetim ({count})</button></div>
+      <div className="header-icons"><span>♡ Favorilerim</span><span>Hesabım</span><button className="ghost" onClick={openCart}>Sepetim ({count})</button></div>
     </header>
     <section className="campaign-ticker" aria-label={requestSettings.campaign_title||'Haftanın Kampanyaları'}>
       <div className="campaign-ticker-label">{requestSettings.campaign_title||'HAFTANIN KAMPANYALARI'}</div>
@@ -249,7 +255,7 @@ export default function Storefront(){
 
     {view==='success'&&<section className="checkout-shell payment-success custom-success-screen"><div className="shield">{requestSettings.success_icon||'✅'}</div><h2>{requestSettings.success_title||'Talebiniz alındı'}</h2><p>{requestSettings.success_message||'Talep bilgileriniz başarıyla kaydedildi.'}</p><button className="big-red" onClick={()=>{setCart([]);setOrderId(null);setRequestForm({request_name:'',request_number:'',tk_date:'',moruk_code:''});setView('home')}}>{requestSettings.success_button_text||'Mağazaya Dön'}</button></section>}
 
-    {view==='home'&&<button className="floating-cart" onClick={()=>setView('cart')} aria-label={`Sepet, ${count} ürün`}><span className="floating-cart-icon">🛒</span><span className="floating-cart-text">Sepet</span><span className="floating-cart-count">{count}</span></button>}
+    {view==='home'&&<button className="floating-cart" onClick={openCart} aria-label={`Sepet, ${count} ürün`}><span className="floating-cart-icon">🛒</span><span className="floating-cart-text">Sepet</span><span className="floating-cart-count">{count}</span></button>}
 
     <footer className="footer"><div><h4>KARACA</h4><p>Karaca Kurumsal</p><p>Hakkımızda</p><p>Mağazalarımız</p><p>İletişim</p></div><div><h4>YARDIM</h4><p>İade ve İptal Şartları</p><p>Bilgi Toplumu Hizmetleri</p><p>İşlem Rehberi</p><p>Sipariş Takibi</p></div><div><h4>ALIŞVERİŞ</h4><p>Kampanyalar</p><p>Tüm Markalar</p><p>Kolay İade</p></div><div><h4>KİŞİSEL VERİLERİN KORUNMASI</h4><p>Bilgilendirme</p><p>KVKK</p><p>Çerez Politikası</p></div><div className="footer-etbis"><img src="/etbis-qr.png" alt="ETBİS Kayıt QR"/></div><div className="footer-wide"><small>© 2026 - Tüm hakları saklıdır.</small></div></footer>
     <div className="payment-strip"><img src="/payment-methods.png" alt="Ödeme yöntemleri"/></div>
