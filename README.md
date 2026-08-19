@@ -1,36 +1,46 @@
-# Karaca Shop - Talep Formu Sürümü
+# Karaca Shop – V2 Admin + Sepet + Talep Formu
 
-Next.js + Supabase + Vercel tabanlı mağaza demosu.
+Bu paket tam proje sürümüdür.
 
-## Akış
-1. Sepet
-2. Teslimat Bilgileri
-3. Talep Formu
-4. Onay
+## Bu sürümde eklenenler
 
-Talep formu alanları:
-- Talep Edenin Adı Soyadı
-- Talep Numarası: yalnızca rakam, tam 18 hane; ekranda 4'lü gruplar halinde gösterilir.
-- TK: AA/YY formatında 4 rakam; ay 01-12 aralığında olmalıdır.
+- Ana sayfada sağ altta mobil uyumlu sabit sepet butonu ve ürün adedi.
+- Talep Formu sayfasında seçilen ürünlerin görseli, adı, birim fiyatı, adet miktarı ve satır toplamı.
+- Talep Formu içinden `+ / -` ile ürün adedi değiştirme ve ürünü kaldırma.
+- Talep gönderildiğinde son sepet adedi ve toplam tutar `orders.items` / `orders.total` alanına güncel olarak yazılır.
+- Admin panelinde gelişmiş canlı mağaza görünümü, ziyaretçi hunisi ve hareket listesi.
+- Admin panelinde talepleri tek tek seçerek toplu silme veya tüm talepleri temizleme.
+- `Talep Sayfası Metinleri ve Logoları` yönetim alanı.
+- Talep sayfasındaki başlık, placeholder/kutu içi yazı, alt açıklama, buton yazısı ve 4 logo admin panelinden düzenlenebilir.
+- Talep Numarası zorunlu hane sayısı admin panelinden 1–32 arasında seçilebilir.
+- MORUK zorunlu hane sayısı admin panelinden 1–12 arasında seçilebilir.
+- 7 adet başlangıç / Çok Satan ürün admin girişinde otomatik olarak `products` tablosuna eklenir.
+- Ürün, banner ve logo yüklemeleri `ADMIN_DASHBOARD_TOKEN` korumalı sunucu API'lerinden ve Supabase service role üzerinden yapılır.
+- Mobil admin, mobil sepet, mobil talep ürün özeti ve mobil banner swipe iyileştirmeleri.
 
-Talep bilgileri `orders` tablosundaki `request_name`, `request_number` ve `tk_date` alanlarına kaydedilir. Admin panelinde Talep Kayıtları bölümünde görünür.
+## Mevcut Supabase projesini güncelliyorsan
 
-## Supabase
-Supabase SQL Editor'da bu paketin içindeki `supabase.sql` dosyasını çalıştırın. Script mevcut tabloları silmez; yeni talep alanlarını `add column if not exists` ile ekler.
+Supabase > SQL Editor > New query aç ve bu dosyayı BİR KEZ çalıştır:
+
+`supabase-v2-admin-sepet.sql`
+
+Bu dosya mevcut talepleri silmez. Yeni talep ayar sütunlarını ekler ve eski sabit 18/4 hane constraintlerini dinamik yapıya uygun hale getirir.
+
+## Yeni Supabase projesi kuruyorsan
+
+`supabase.sql` dosyasını çalıştırman yeterli. V2 güncellemeleri dosyanın sonunda dahil edilmiştir.
 
 ## Vercel Environment Variables
+
+Aşağıdaki değerler bulunmalıdır:
+
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_DASHBOARD_TOKEN`
 
-Environment variable değişikliklerinden sonra Vercel'de Redeploy yapın.
+Environment Variables güncellendikten sonra Vercel'de yeniden deploy et.
 
-## Son güncelleme: teslimat + talep formu yönetimi
-- Teslimat alanlarında görünür başlıklar eklendi; e-posta kaldırıldı.
-- Telefon alanı Türkiye cep telefonu biçiminde otomatik formatlanır: `0 (5xx) xxx xx xx`.
-- Talep formuna 4 haneli yalnızca rakam kabul eden `MORUK` alanı eklendi.
-- Talep formunda 4 adet mobil uyumlu logo alanı bulunur.
-- Admin panelinden talep formu sayfa/bölüm/alan başlıkları değiştirilebilir.
-- Admin panelinden dört logo yüklenebilir.
-- Mevcut Supabase projesinde `supabase-talep-guncelleme.sql` dosyasını SQL Editor'da çalıştırın.
+## Admin
+
+`/admin` adresine gir. `ADMIN_DASHBOARD_TOKEN` değerini şifre olarak kullan.
