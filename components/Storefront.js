@@ -232,7 +232,7 @@ export default function Storefront(){
 
     {view==='success'&&<section className="checkout-shell payment-success"><div className="shield">✅</div><h2>Talebiniz alındı</h2><p>Talep bilgileriniz başarıyla kaydedildi.</p><button className="big-red" onClick={()=>{setCart([]);setOrderId(null);setRequestForm({request_name:'',request_number:'',tk_date:'',moruk_code:''});setView('home')}}>Mağazaya Dön</button></section>}
 
-    {view==='home'&&count>0&&<button className="floating-cart" onClick={()=>setView('cart')} aria-label={`Sepet, ${count} ürün`}><span className="floating-cart-icon">🛒</span><span className="floating-cart-text">Sepet</span><span className="floating-cart-count">{count}</span></button>}
+    {view==='home'&&<button className="floating-cart" onClick={()=>setView('cart')} aria-label={`Sepet, ${count} ürün`}><span className="floating-cart-icon">🛒</span><span className="floating-cart-text">Sepet</span><span className="floating-cart-count">{count}</span></button>}
 
     <footer className="footer"><div><h4>KARACA</h4><p>Karaca Kurumsal</p><p>Hakkımızda</p><p>Mağazalarımız</p><p>İletişim</p></div><div><h4>YARDIM</h4><p>İade ve İptal Şartları</p><p>Bilgi Toplumu Hizmetleri</p><p>İşlem Rehberi</p><p>Sipariş Takibi</p></div><div><h4>ALIŞVERİŞ</h4><p>Kampanyalar</p><p>Tüm Markalar</p><p>Kolay İade</p></div><div><h4>KİŞİSEL VERİLERİN KORUNMASI</h4><p>Bilgilendirme</p><p>KVKK</p><p>Çerez Politikası</p></div><div className="footer-etbis"><img src="/etbis-qr.png" alt="ETBİS Kayıt QR"/></div><div className="footer-wide"><small>© 2026 - Tüm hakları saklıdır.</small></div></footer>
     <div className="payment-strip"><img src="/payment-methods.png" alt="Ödeme yöntemleri"/></div>

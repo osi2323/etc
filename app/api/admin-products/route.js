@@ -32,6 +32,11 @@ export async function POST(req){
       name:clean(b.name,160),description:clean(b.description,800),price:Math.max(0,Number(b.price)||0),old_price:Math.max(0,Number(b.old_price)||0),stock:Math.max(0,Number(b.stock)||0),image_url:clean(b.image_url,500),sort_order:Number(b.sort_order)||0,active:b.active!==false
     };
     if(!payload.name||payload.price<=0) return NextResponse.json({error:'Ürün adı ve fiyat zorunludur.'},{status:400});
+    if(b.id){
+      const {data,error}=await c.from('products').update(payload).eq('id',b.id).select('*').single();
+      if(error) throw error;
+      return NextResponse.json({product:data,updated:true});
+    }
     const {data,error}=await c.from('products').insert(payload).select('*').single();
     if(error) throw error;
     return NextResponse.json({product:data});

@@ -31,6 +31,7 @@ export default function AdminPanel(){
   const [requestSettings,setRequestSettings]=useState(defaultSettings);
   const [settingsSaving,setSettingsSaving]=useState(false);
   const [form,setForm]=useState({name:'',description:'',price:'',old_price:'',stock:'',image_url:'',sort_order:0,active:true});
+  const [editingProduct,setEditingProduct]=useState(null);
 
   const completedCount=useMemo(()=>orders.filter(o=>o.status==='Talep Alındı').length,[orders]);
   const pendingCount=useMemo(()=>orders.filter(o=>o.status!=='Talep Alındı').length,[orders]);
@@ -108,6 +109,30 @@ export default function AdminPanel(){
     const d=await r.json().catch(()=>({}));
     if(!r.ok){setMessage(d.error||'Ürün silinemedi.');return;}
     setMessage('Ürün silindi.');load();
+  }
+
+
+  function startEditProduct(p){
+    setEditingProduct({...p});
+    setMessage('');
+    setTimeout(()=>document.getElementById('product-edit-panel')?.scrollIntoView({behavior:'smooth',block:'center'}),50);
+  }
+
+  async function saveProductEdit(e){
+    e.preventDefault();
+    if(!adminToken||!editingProduct)return;
+    setMessage('Ürün güncelleniyor...');
+    try{
+      const file=e.currentTarget.editProductImage?.files?.[0];
+      const image_url=file?await adminUpload(file,'products'):(editingProduct.image_url||'');
+      const payload={...editingProduct,image_url};
+      const r=await fetch('/api/admin-products',{method:'POST',headers:{'content-type':'application/json','x-admin-token':adminToken},body:JSON.stringify(payload)});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(d.error||'Ürün güncellenemedi.');
+      setMessage('Ürün güncellendi.');
+      setEditingProduct(null);
+      await load();
+    }catch(err){setMessage(err.message||'Ürün güncellenemedi.');}
   }
 
   async function loadOrders(token=adminToken){
@@ -288,6 +313,22 @@ export default function AdminPanel(){
 
     <section className="admin-card"><h2>Banner / Orta Bölüm Görselleri</h2><p className="muted">Her alan için ayrı masaüstü ve mobil görsel yükleyebilirsin.</p><div className="banner-admin-grid">{[0,1,2,3].map(i=><form key={i} onSubmit={e=>saveBanner(i,e)} className="banner-form"><h3>Banner {i+1}</h3><label>PC görseli<input name="desktop" type="file" accept="image/*"/></label><label>Mobil görsel<input name="mobile" type="file" accept="image/*"/></label>{banners[i]?.desktop_url&&<img src={banners[i].desktop_url} alt="önizleme"/>}<button>Kaydet</button></form>)}</div></section>
 
-    <section className="admin-card"><div className="admin-section-head"><div><h2>Ürünler / Çok Satanlar</h2><p className="muted">Projedeki 7 başlangıç ürünü admin girişinde otomatik olarak bu listeye eklenir.</p></div><span className="product-count-badge">{products.length} ürün</span></div><div className="admin-products">{products.map(p=><div className="admin-product" key={p.id}><img src={p.image_url||'/placeholder-product.svg'} alt={p.name}/><div><strong>{p.name}</strong><p>₺{money(p.price)} · {p.stock??0} stok</p><small>{p.description}</small></div><button onClick={()=>deleteProduct(p.id)}>Sil</button></div>)}</div></section>
+    <section className="admin-card"><div className="admin-section-head"><div><h2>Ürünler / Çok Satanlar</h2><p className="muted">Ürün adı, açıklama, fiyat, stok ve sıralamayı buradan değiştirebilirsin.</p></div><span className="product-count-badge">{products.length} ürün</span></div>
+      {editingProduct&&<form id="product-edit-panel" className="product-edit-panel" onSubmit={saveProductEdit}>
+        <div className="admin-section-head"><div><div className="eyebrow">ÜRÜN DÜZENLE</div><h3>{editingProduct.name}</h3></div><button type="button" className="ghost" onClick={()=>setEditingProduct(null)}>Kapat</button></div>
+        <div className="settings-grid">
+          <label>Ürün adı<input required value={editingProduct.name||''} onChange={e=>setEditingProduct({...editingProduct,name:e.target.value})}/></label>
+          <label>Satış fiyatı<input required type="number" value={editingProduct.price??''} onChange={e=>setEditingProduct({...editingProduct,price:e.target.value})}/></label>
+          <label>Eski fiyat<input type="number" value={editingProduct.old_price??''} onChange={e=>setEditingProduct({...editingProduct,old_price:e.target.value})}/></label>
+          <label>Stok<input type="number" min="0" value={editingProduct.stock??''} onChange={e=>setEditingProduct({...editingProduct,stock:e.target.value})}/></label>
+          <label>Sıra<input type="number" value={editingProduct.sort_order??0} onChange={e=>setEditingProduct({...editingProduct,sort_order:e.target.value})}/></label>
+          <label>Aktif<select value={editingProduct.active===false?'0':'1'} onChange={e=>setEditingProduct({...editingProduct,active:e.target.value==='1'})}><option value="1">Evet</option><option value="0">Hayır</option></select></label>
+          <label className="wide">Açıklama<textarea rows="4" value={editingProduct.description||''} onChange={e=>setEditingProduct({...editingProduct,description:e.target.value})}/></label>
+          <label className="wide">Yeni ürün görseli (isteğe bağlı)<input name="editProductImage" type="file" accept="image/*"/></label>
+        </div>
+        <button className="primary settings-save">Değişiklikleri Kaydet</button>
+      </form>}
+      <div className="admin-products">{products.map(p=><div className="admin-product" key={p.id}><img src={p.image_url||'/placeholder-product.svg'} alt={p.name}/><div><strong>{p.name}</strong><p>₺{money(p.price)} · {p.stock??0} stok · Sıra {p.sort_order??0}</p><small>{p.description}</small></div><div className="admin-product-actions"><button type="button" onClick={()=>startEditProduct(p)}>Düzenle</button><button type="button" className="danger-soft" onClick={()=>deleteProduct(p.id)}>Sil</button></div></div>)}</div>
+    </section>
   </main>;
 }
