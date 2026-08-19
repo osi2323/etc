@@ -8,7 +8,7 @@ function db(){
 }
 
 const defaults={
-  request_title:'Talep Formu',request_section_title:'Talep Bilgileri',request_intro:'Aşağıdaki alanları eksiksiz doldurun.',cart_section_title:'Seçtiğiniz Ürünler',
+  request_title:'Talep Formu',request_section_title:'Talep Bilgileri',request_intro:'Aşağıdaki alanları eksiksiz doldurun.',cart_section_title:'Seçtiğiniz Ürünler',delivery_cart_title:'Sipariş Özeti',delivery_button_text:'Talep Formuna Geç',
   label_name:'Talep Edenin Adı Soyadı',placeholder_name:'AD SOYAD',helper_name:'',
   label_number:'Talep Numarası',placeholder_number:'1234 5678 9012 3456 78',helper_number:'Yalnızca rakam giriniz.',request_number_length:18,
   label_tk:'TK',placeholder_tk:'AA/YY',helper_tk:'AA/YY formatında giriniz.',
@@ -38,7 +38,7 @@ export async function POST(req){
     const b=await req.json();
     const payload={
       id:1,
-      request_title:clean(b.request_title),request_section_title:clean(b.request_section_title),request_intro:clean(b.request_intro,400),cart_section_title:clean(b.cart_section_title),
+      request_title:clean(b.request_title),request_section_title:clean(b.request_section_title),request_intro:clean(b.request_intro,400),cart_section_title:clean(b.cart_section_title),delivery_cart_title:clean(b.delivery_cart_title),delivery_button_text:clean(b.delivery_button_text),
       label_name:clean(b.label_name),placeholder_name:clean(b.placeholder_name),helper_name:clean(b.helper_name,240),
       label_number:clean(b.label_number),placeholder_number:clean(b.placeholder_number),helper_number:clean(b.helper_number,240),request_number_length:num(b.request_number_length,1,32,18),
       label_tk:clean(b.label_tk),placeholder_tk:clean(b.placeholder_tk),helper_tk:clean(b.helper_tk,240),
