@@ -182,7 +182,7 @@ export default function Storefront(){
   }
 
   return <main>
-    <div className="topline">2500 TL üzeri alışverişlerde kargo ücretsiz</div>
+    <div className="topline">Haftaya özel tüm alışverişlerde kargo ücretsiz!</div>
     <header className="header">
       <button className="brand ghost" onClick={()=>setView('home')}>KARACA</button>
       <div className="search">Aradığın Her Şey</div>
